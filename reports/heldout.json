@@ -1,0 +1,1236 @@
+{
+ "world": "heldout",
+ "volume": {
+  "weeks": 26,
+  "live_from_week": 13,
+  "emails": 28600,
+  "invoices": 18200,
+  "chats": 13000,
+  "letter_week": 14,
+  "invoices_billed_eur": 1784944.5,
+  "invoices_payable_eur": 1650366.71
+ },
+ "contracts": {
+  "assist": {
+   "name": "chat-assist",
+   "owner": "Concierge",
+   "purpose": "Draft an answer to a customer's chat question from the tariff conditions, for the agent to check and send",
+   "candidates": [
+    "small",
+    "large"
+   ],
+   "gate": {
+    "min_quality": 0.95,
+    "max_cost_per_case_eur": 0.02,
+    "max_p95_latency_s": 6.0
+   }
+  },
+  "invoices": {
+   "name": "invoice-check",
+   "owner": "Claims",
+   "purpose": "Read a doctor's invoice, check it against the fee schedule and the tariff, and settle it or send it to a person",
+   "candidates": [
+    "small",
+    "large"
+   ],
+   "gate": {
+    "min_quality": 0.97,
+    "max_cost_per_case_eur": 0.03,
+    "max_p95_latency_s": 60.0
+   }
+  },
+  "routing": {
+   "name": "email-routing",
+   "owner": "Customer Service",
+   "purpose": "Send every customer email to the team that will answer it",
+   "candidates": [
+    "classical",
+    "small",
+    "large"
+   ],
+   "gate": {
+    "min_quality": 0.93,
+    "max_cost_per_case_eur": 0.002,
+    "max_p95_latency_s": 3.0
+   }
+  }
+ },
+ "selection": {
+  "routing": {
+   "trials": [
+    {
+     "model": "classical",
+     "quality": 0.9882,
+     "cost_per_case_eur": 0.00013,
+     "people_and_leakage_per_case_eur": 0.04964,
+     "p95_latency_s": 1.4,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "small",
+     "quality": 0.9355,
+     "cost_per_case_eur": 0.00077,
+     "people_and_leakage_per_case_eur": 0.27109,
+     "p95_latency_s": 1.4,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "large",
+     "quality": 0.9545,
+     "cost_per_case_eur": 0.00237,
+     "people_and_leakage_per_case_eur": 0.19091,
+     "p95_latency_s": 4.5,
+     "passes": false,
+     "why": "cost 0.0024 over 0.002; p95 latency 4.5s over 3.0s"
+    }
+   ],
+   "chosen": "classical"
+  },
+  "invoices": {
+   "trials": [
+    {
+     "model": "small",
+     "quality": 0.9907,
+     "cost_per_case_eur": 0.00856,
+     "people_and_leakage_per_case_eur": 0.24805,
+     "p95_latency_s": 22.8,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "large",
+     "quality": 0.9907,
+     "cost_per_case_eur": 0.02126,
+     "people_and_leakage_per_case_eur": 0.03683,
+     "p95_latency_s": 29.0,
+     "passes": true,
+     "why": "clears the gate"
+    }
+   ],
+   "chosen": "large"
+  },
+  "assist": {
+   "trials": [
+    {
+     "model": "small",
+     "quality": 0.999,
+     "cost_per_case_eur": 0.00334,
+     "people_and_leakage_per_case_eur": 1.043,
+     "p95_latency_s": 2.8,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "large",
+     "quality": 0.998,
+     "cost_per_case_eur": 0.0114,
+     "people_and_leakage_per_case_eur": 0.84,
+     "p95_latency_s": 9.0,
+     "passes": false,
+     "why": "p95 latency 9.0s over 6.0s"
+    }
+   ],
+   "chosen": "small"
+  }
+ },
+ "routing": {
+  "validation": {
+   "random_split": 0.9869,
+   "grouped_by_time_and_customer": 0.9678,
+   "production_before_letter": 0.9745,
+   "random_test_emails": 2590,
+   "grouped_test_emails": 1830
+  },
+  "designs": {
+   "large_everywhere": {
+    "accuracy": 0.9431,
+    "accuracy_on_letter_answers": 0.9279,
+    "misroutes": 876,
+    "misroutes_per_week": 62.6,
+    "llm_share": 1.0,
+    "large_share": 1.0,
+    "cost_per_email_eur": 0.002374,
+    "model_eur_per_month": 11.32,
+    "people_hours_per_month": 27.1,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9573,
+     0.9509,
+     0.9473,
+     0.9418,
+     0.9436,
+     0.9345,
+     0.94,
+     0.94,
+     0.9373,
+     0.9409,
+     0.9382,
+     0.9327,
+     0.9491,
+     0.95
+    ],
+    "alarms": [],
+    "retrains": 0,
+    "daily": []
+   },
+   "small_everywhere": {
+    "accuracy": 0.9114,
+    "accuracy_on_letter_answers": 0.8801,
+    "misroutes": 1364,
+    "misroutes_per_week": 97.4,
+    "llm_share": 1.0,
+    "large_share": 0.0,
+    "cost_per_email_eur": 0.000768,
+    "model_eur_per_month": 3.66,
+    "people_hours_per_month": 42.2,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9391,
+     0.8936,
+     0.9264,
+     0.9036,
+     0.8827,
+     0.9145,
+     0.9027,
+     0.9227,
+     0.9109,
+     0.9018,
+     0.9118,
+     0.9127,
+     0.9291,
+     0.9082
+    ],
+    "alarms": [],
+    "retrains": 0,
+    "daily": []
+   },
+   "classical_static": {
+    "accuracy": 0.9466,
+    "accuracy_on_letter_answers": 0.8801,
+    "misroutes": 823,
+    "misroutes_per_week": 58.8,
+    "llm_share": 0.4738,
+    "large_share": 0.0,
+    "cost_per_email_eur": 0.000384,
+    "model_eur_per_month": 1.83,
+    "people_hours_per_month": 25.5,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9845,
+     0.9373,
+     0.9464,
+     0.9455,
+     0.9264,
+     0.9455,
+     0.9382,
+     0.9518,
+     0.9418,
+     0.9327,
+     0.9482,
+     0.95,
+     0.9573,
+     0.9464
+    ],
+    "alarms": [],
+    "retrains": 0,
+    "daily": []
+   },
+   "platform_no_monitor": {
+    "accuracy": 0.981,
+    "accuracy_on_letter_answers": 0.9656,
+    "misroutes": 292,
+    "misroutes_per_week": 20.9,
+    "llm_share": 0.1581,
+    "large_share": 0.0,
+    "cost_per_email_eur": 0.000141,
+    "model_eur_per_month": 0.67,
+    "people_hours_per_month": 9.0,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9845,
+     0.9382,
+     0.9482,
+     0.9536,
+     0.96,
+     0.9827,
+     0.9891,
+     0.9936,
+     0.9955,
+     0.9991,
+     0.9982,
+     0.9973,
+     0.9982,
+     0.9964
+    ],
+    "alarms": [],
+    "retrains": 13,
+    "daily": []
+   },
+   "platform": {
+    "accuracy": 0.9901,
+    "accuracy_on_letter_answers": 0.9853,
+    "misroutes": 153,
+    "misroutes_per_week": 10.9,
+    "llm_share": 0.0883,
+    "large_share": 0.0029,
+    "cost_per_email_eur": 9.3e-05,
+    "model_eur_per_month": 0.44,
+    "people_hours_per_month": 6.1,
+    "labels_from_people": 273,
+    "weekly": [
+     0.9845,
+     0.9473,
+     0.9709,
+     0.9945,
+     0.99,
+     0.9936,
+     0.9945,
+     0.9964,
+     0.9973,
+     1.0,
+     0.9982,
+     0.9973,
+     0.9982,
+     0.9982
+    ],
+    "alarms": [
+     {
+      "week": 14,
+      "day": 0,
+      "why": [
+       "48% of emails under the confidence floor, against 14% usually",
+       "predicted team mix shifted (PSI 0.22)"
+      ]
+     }
+    ],
+    "retrains": 27,
+    "daily": [
+     {
+      "week": 13,
+      "day": 0,
+      "low_confidence": 0.1438,
+      "psi": 0.0221,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 1,
+      "low_confidence": 0.1447,
+      "psi": 0.0416,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 2,
+      "low_confidence": 0.1437,
+      "psi": 0.0302,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 3,
+      "low_confidence": 0.1413,
+      "psi": 0.0097,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 4,
+      "low_confidence": 0.1522,
+      "psi": 0.0368,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 5,
+      "low_confidence": 0.1399,
+      "psi": 0.031,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 6,
+      "low_confidence": 0.1779,
+      "psi": 0.0476,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 0,
+      "low_confidence": 0.4813,
+      "psi": 0.2209,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 1,
+      "low_confidence": 0.3841,
+      "psi": 0.1153,
+      "alarm": true
+     },
+     {
+      "week": 14,
+      "day": 2,
+      "low_confidence": 0.4481,
+      "psi": 0.1411,
+      "alarm": true
+     },
+     {
+      "week": 14,
+      "day": 3,
+      "low_confidence": 0.3725,
+      "psi": 0.1789,
+      "alarm": true
+     },
+     {
+      "week": 14,
+      "day": 4,
+      "low_confidence": 0.3846,
+      "psi": 0.3851,
+      "alarm": true
+     },
+     {
+      "week": 14,
+      "day": 5,
+      "low_confidence": 0.3208,
+      "psi": 0.2818,
+      "alarm": true
+     },
+     {
+      "week": 14,
+      "day": 6,
+      "low_confidence": 0.2455,
+      "psi": 0.1891,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 0,
+      "low_confidence": 0.372,
+      "psi": 0.2189,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 1,
+      "low_confidence": 0.2416,
+      "psi": 0.2651,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 2,
+      "low_confidence": 0.223,
+      "psi": 0.2317,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 3,
+      "low_confidence": 0.1728,
+      "psi": 0.2439,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 4,
+      "low_confidence": 0.1692,
+      "psi": 0.3522,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 5,
+      "low_confidence": 0.1209,
+      "psi": 0.1419,
+      "alarm": true
+     },
+     {
+      "week": 15,
+      "day": 6,
+      "low_confidence": 0.0747,
+      "psi": 0.1423,
+      "alarm": true
+     },
+     {
+      "week": 16,
+      "day": 0,
+      "low_confidence": 0.1126,
+      "psi": 0.0829,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 1,
+      "low_confidence": 0.0955,
+      "psi": 0.0147,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 2,
+      "low_confidence": 0.0641,
+      "psi": 0.1097,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 3,
+      "low_confidence": 0.0552,
+      "psi": 0.0317,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 4,
+      "low_confidence": 0.1159,
+      "psi": 0.0669,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 5,
+      "low_confidence": 0.0943,
+      "psi": 0.1548,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 6,
+      "low_confidence": 0.0933,
+      "psi": 0.0325,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 0,
+      "low_confidence": 0.0952,
+      "psi": 0.0683,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 1,
+      "low_confidence": 0.098,
+      "psi": 0.1749,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 2,
+      "low_confidence": 0.0813,
+      "psi": 0.1487,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 3,
+      "low_confidence": 0.1013,
+      "psi": 0.035,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 4,
+      "low_confidence": 0.0789,
+      "psi": 0.0809,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 5,
+      "low_confidence": 0.1006,
+      "psi": 0.0439,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 6,
+      "low_confidence": 0.1067,
+      "psi": 0.0338,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 0,
+      "low_confidence": 0.0448,
+      "psi": 0.0492,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 1,
+      "low_confidence": 0.06,
+      "psi": 0.0526,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 2,
+      "low_confidence": 0.0705,
+      "psi": 0.0883,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 3,
+      "low_confidence": 0.0479,
+      "psi": 0.1664,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 4,
+      "low_confidence": 0.0364,
+      "psi": 0.0781,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 5,
+      "low_confidence": 0.0659,
+      "psi": 0.0862,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 6,
+      "low_confidence": 0.0683,
+      "psi": 0.0321,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 0,
+      "low_confidence": 0.0833,
+      "psi": 0.0312,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 1,
+      "low_confidence": 0.052,
+      "psi": 0.0584,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 2,
+      "low_confidence": 0.0424,
+      "psi": 0.0832,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 3,
+      "low_confidence": 0.0645,
+      "psi": 0.0746,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 4,
+      "low_confidence": 0.0435,
+      "psi": 0.0638,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 5,
+      "low_confidence": 0.0318,
+      "psi": 0.1114,
+      "alarm": false
+     },
+     {
+      "week": 19,
+      "day": 6,
+      "low_confidence": 0.0759,
+      "psi": 0.1309,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 0,
+      "low_confidence": 0.0185,
+      "psi": 0.049,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 1,
+      "low_confidence": 0.035,
+      "psi": 0.1593,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 2,
+      "low_confidence": 0.0265,
+      "psi": 0.0796,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 3,
+      "low_confidence": 0.0281,
+      "psi": 0.1104,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 4,
+      "low_confidence": 0.0331,
+      "psi": 0.0808,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 5,
+      "low_confidence": 0.0325,
+      "psi": 0.0949,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 6,
+      "low_confidence": 0.0559,
+      "psi": 0.1069,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 0,
+      "low_confidence": 0.0204,
+      "psi": 0.0369,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 1,
+      "low_confidence": 0.0424,
+      "psi": 0.1479,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 2,
+      "low_confidence": 0.017,
+      "psi": 0.1043,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 3,
+      "low_confidence": 0.0272,
+      "psi": 0.0277,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 4,
+      "low_confidence": 0.0671,
+      "psi": 0.0429,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 5,
+      "low_confidence": 0.0519,
+      "psi": 0.0738,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 6,
+      "low_confidence": 0.0136,
+      "psi": 0.0918,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 0,
+      "low_confidence": 0.0216,
+      "psi": 0.0444,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 1,
+      "low_confidence": 0.0179,
+      "psi": 0.0405,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 2,
+      "low_confidence": 0.0176,
+      "psi": 0.0213,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 3,
+      "low_confidence": 0.0278,
+      "psi": 0.0831,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 4,
+      "low_confidence": 0.0312,
+      "psi": 0.0748,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 5,
+      "low_confidence": 0.0368,
+      "psi": 0.0686,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 6,
+      "low_confidence": 0.0321,
+      "psi": 0.059,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 0,
+      "low_confidence": 0.0407,
+      "psi": 0.0306,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 1,
+      "low_confidence": 0.0533,
+      "psi": 0.0331,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 2,
+      "low_confidence": 0.0533,
+      "psi": 0.0491,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 3,
+      "low_confidence": 0.0074,
+      "psi": 0.1007,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 4,
+      "low_confidence": 0.0405,
+      "psi": 0.043,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 5,
+      "low_confidence": 0.0123,
+      "psi": 0.0938,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 6,
+      "low_confidence": 0.0256,
+      "psi": 0.0814,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 0,
+      "low_confidence": 0.0435,
+      "psi": 0.0371,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 1,
+      "low_confidence": 0.0146,
+      "psi": 0.1762,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 2,
+      "low_confidence": 0.0261,
+      "psi": 0.0468,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 3,
+      "low_confidence": 0.0351,
+      "psi": 0.0181,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 4,
+      "low_confidence": 0.0134,
+      "psi": 0.0932,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 5,
+      "low_confidence": 0.0377,
+      "psi": 0.0631,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 6,
+      "low_confidence": 0.0235,
+      "psi": 0.0612,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 0,
+      "low_confidence": 0.0493,
+      "psi": 0.0532,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 1,
+      "low_confidence": 0.0195,
+      "psi": 0.0255,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 2,
+      "low_confidence": 0.0471,
+      "psi": 0.0558,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 3,
+      "low_confidence": 0.0573,
+      "psi": 0.0745,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 4,
+      "low_confidence": 0.0125,
+      "psi": 0.0627,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 5,
+      "low_confidence": 0.0382,
+      "psi": 0.0444,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 6,
+      "low_confidence": 0.0187,
+      "psi": 0.0485,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 0,
+      "low_confidence": 0.0068,
+      "psi": 0.0522,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 1,
+      "low_confidence": 0.0204,
+      "psi": 0.0639,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 2,
+      "low_confidence": 0.0258,
+      "psi": 0.0454,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 3,
+      "low_confidence": 0.0181,
+      "psi": 0.0113,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 4,
+      "low_confidence": 0.0452,
+      "psi": 0.0634,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 5,
+      "low_confidence": 0.0719,
+      "psi": 0.0156,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 6,
+      "low_confidence": 0.0325,
+      "psi": 0.0476,
+      "alarm": false
+     }
+    ]
+   }
+  },
+  "drift": {
+   "letter_week": 14,
+   "alarm": {
+    "week": 14,
+    "day": 0,
+    "why": [
+     "48% of emails under the confidence floor, against 14% usually",
+     "predicted team mix shifted (PSI 0.22)"
+    ]
+   },
+   "detected_after_days": 0,
+   "false_alarms_before_letter": 0
+  },
+  "example": {
+   "text": "Hallo, wegen der Beitragsanpassung: welche Optionen habe ich, damit der Beitrag sinkt. welche Optionen habe ich, damit der Beitrag sinkt. Danke im Voraus",
+   "team": "tarif"
+  }
+ },
+ "invoices": {
+  "llm_decides": {
+   "invoices": 9800,
+   "settled_without_person": 0.9937,
+   "wrong_automatic_settlements": 516,
+   "overpaid_per_1000_eur": 1921.91,
+   "underpaid_per_1000_eur": 119.81,
+   "second_reads": 0.0,
+   "cost_per_invoice_eur": 0.02073,
+   "model_eur_per_month": 62.88,
+   "people_hours_per_month": 1.3,
+   "people_minutes_per_invoice": 0.0253,
+   "overpaid_eur_per_month": 5829.79,
+   "quality": 0.9473,
+   "example": null
+  },
+  "code_rules": {
+   "invoices": 9800,
+   "settled_without_person": 0.9937,
+   "wrong_automatic_settlements": 594,
+   "overpaid_per_1000_eur": 175.72,
+   "underpaid_per_1000_eur": 591.68,
+   "second_reads": 0.0,
+   "cost_per_invoice_eur": 0.02073,
+   "model_eur_per_month": 62.88,
+   "people_hours_per_month": 1.3,
+   "people_minutes_per_invoice": 0.0253,
+   "overpaid_eur_per_month": 533.02,
+   "quality": 0.9394,
+   "example": null
+  },
+  "platform": {
+   "invoices": 9800,
+   "settled_without_person": 0.9859,
+   "wrong_automatic_settlements": 71,
+   "overpaid_per_1000_eur": 170.36,
+   "underpaid_per_1000_eur": 60.32,
+   "second_reads": 0.4779,
+   "cost_per_invoice_eur": 0.02125,
+   "model_eur_per_month": 64.46,
+   "people_hours_per_month": 2.8,
+   "people_minutes_per_invoice": 0.0563,
+   "overpaid_eur_per_month": 516.77,
+   "quality": 0.9928,
+   "example": {
+    "id": "R008402",
+    "invoice": "Rechnung Dr. Hoffmann, Behandlung am 2026-04-03\nGOÄ 3550  Faktor 1,15  4,02 €\nGOÄ 5  Faktor 3,2  14,92 €\n  Begründung: erhöhter Zeitaufwand wegen komplexer Anamnese\nGOÄ 410  Faktor 1,8  20,98 €\nGOÄ 3  Faktor 2,9  25,35 €\nGOÄ 3511  Faktor 1,3  3,79 €\n  Begründung: schwierige Untersuchung bei Mehrfacherkrankung\nGOÄ 651  Faktor 2,4  21,26 €\nSumme 90,32 €",
+    "billed": 90.32,
+    "paid": 79.77,
+    "notes": [
+     "GOÄ 3: factor 2.9 above the threshold without a written reason",
+     "GOÄ 3: billed 25.35, allowed 20.11",
+     "GOÄ 651: factor 2.4 above the threshold without a written reason",
+     "GOÄ 651: billed 21.26, allowed 15.95"
+    ]
+   }
+  }
+ },
+ "assist": {
+  "retrieval": {
+   "tariff_words": 1.0,
+   "paraphrased": 0.297,
+   "paraphrased_after_rewrite": 0.8123
+  },
+  "floor": 0.175,
+  "designs": {
+   "memory_large": {
+    "chats": 7000,
+    "drafts_used": 0.3466,
+    "wrong_answers_per_1000": 265.86,
+    "wrong_drafts_caught_by_agent": 2713,
+    "blocked_by_check": 0,
+    "below_floor": 0,
+    "minutes_per_chat": 2.55,
+    "cost_per_chat_eur": 0.01032,
+    "model_eur_per_month": 22.35,
+    "people_hours_per_month": 92.1,
+    "quality": 0.7341,
+    "example": null
+   },
+   "rag_large": {
+    "chats": 7000,
+    "drafts_used": 0.5749,
+    "wrong_answers_per_1000": 69.86,
+    "wrong_drafts_caught_by_agent": 714,
+    "blocked_by_check": 0,
+    "below_floor": 0,
+    "minutes_per_chat": 2.17,
+    "cost_per_chat_eur": 0.01032,
+    "model_eur_per_month": 22.35,
+    "people_hours_per_month": 78.3,
+    "quality": 0.9301,
+    "example": null
+   },
+   "platform": {
+    "chats": 7000,
+    "drafts_used": 0.839,
+    "wrong_answers_per_1000": 2.0,
+    "wrong_drafts_caught_by_agent": 23,
+    "blocked_by_check": 211,
+    "below_floor": 831,
+    "minutes_per_chat": 1.48,
+    "cost_per_chat_eur": 0.00337,
+    "model_eur_per_month": 7.29,
+    "people_hours_per_month": 53.5,
+    "quality": 0.998,
+    "example": {
+     "question": "Werden Reiseimpfungen erstattet?",
+     "draft_fact": "acht Wochen",
+     "cites": [
+      "B7"
+     ],
+     "clause_text": "Reiseimpfungen. Reiseimpfungen und die Impfberatung werden zu 100 Prozent erstattet."
+    }
+   }
+  }
+ },
+ "totals": {
+  "large_everywhere": {
+   "model_eur_per_month": 96.55,
+   "people_hours_per_month": 106.7,
+   "people_eur_per_month": 4481.4,
+   "overpaid_eur_per_month": 5829.79,
+   "all_in_eur_per_month": 10407.74
+  },
+  "platform": {
+   "model_eur_per_month": 72.19,
+   "people_hours_per_month": 62.4,
+   "people_eur_per_month": 2620.8,
+   "overpaid_eur_per_month": 516.77,
+   "all_in_eur_per_month": 3209.76
+  }
+ },
+ "feasibility": {
+  "assist": {
+   "runtime": "lambda",
+   "why": "Lambda is cheaper until about 49,450 cases a day",
+   "lambda_eur_per_month": 0.14,
+   "fargate_eur_per_month": 69.26,
+   "crossover_cases_per_day": 49450,
+   "input_via_s3": false,
+   "concurrency": 1,
+   "quota": {
+    "tokens_per_minute_at_peak": 14100,
+    "quota_share": 0.07,
+    "ask_for_increase": false
+   },
+   "data": [
+    "model calls stay in eu-central-1: no cross-region inference profile outside the EU",
+    "prompts and outputs are not logged in plain text; the audit log keeps ids and hashes",
+    "health data: encrypted with a customer-managed KMS key, access only through the use case's own role",
+    "inputs and outputs deleted after 365 days by an S3 lifecycle rule"
+   ],
+   "model": "small",
+   "bedrock_model_id": "anthropic.claude-haiku-4-5"
+  },
+  "invoices": {
+   "runtime": "lambda",
+   "why": "Lambda is cheaper until about 2,383 cases a day",
+   "lambda_eur_per_month": 4.88,
+   "fargate_eur_per_month": 83.09,
+   "crossover_cases_per_day": 2383,
+   "input_via_s3": true,
+   "concurrency": 4,
+   "quota": {
+    "tokens_per_minute_at_peak": 28671,
+    "quota_share": 0.143,
+    "ask_for_increase": false
+   },
+   "data": [
+    "model calls stay in eu-central-1: no cross-region inference profile outside the EU",
+    "prompts and outputs are not logged in plain text; the audit log keeps ids and hashes",
+    "health data: encrypted with a customer-managed KMS key, access only through the use case's own role",
+    "inputs and outputs deleted after 3650 days by an S3 lifecycle rule"
+   ],
+   "model": "large",
+   "bedrock_model_id": "anthropic.claude-sonnet-4-5"
+  },
+  "routing": {
+   "runtime": "lambda",
+   "why": "Lambda is cheaper until about 98,499 cases a day",
+   "lambda_eur_per_month": 0.13,
+   "fargate_eur_per_month": 69.26,
+   "crossover_cases_per_day": 98499,
+   "input_via_s3": false,
+   "concurrency": 1,
+   "quota": {
+    "tokens_per_minute_at_peak": 387,
+    "quota_share": 0.002,
+    "ask_for_increase": false
+   },
+   "data": [
+    "model calls stay in eu-central-1: no cross-region inference profile outside the EU",
+    "prompts and outputs are not logged in plain text; the audit log keeps ids and hashes",
+    "inputs and outputs deleted after 90 days by an S3 lifecycle rule"
+   ],
+   "model": "classical",
+   "bedrock_model_id": "anthropic.claude-haiku-4-5"
+  }
+ },
+ "gate": {
+  "routing": {
+   "min_accuracy": 0.93,
+   "max_estimate_gap": 0.015,
+   "max_drift_detect_days": 4
+  },
+  "invoices": {
+   "max_overpaid_per_1000_eur": 400,
+   "max_underpaid_per_1000_eur": 150,
+   "min_settled_without_person": 0.7
+  },
+  "assist": {
+   "max_wrong_answers_per_1000": 6,
+   "min_drafts_used": 0.6
+  },
+  "platform": {
+   "max_cost_share_of_large_everywhere": 0.5
+  }
+ }
+}

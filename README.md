@@ -9,8 +9,9 @@ with those three use cases on it:
 - **Every use case is a contract** (`config/usecases/*.toml`): what it reads and returns, which models may serve it,
   the bar it must clear, its traffic, and the data it touches. The platform refuses a contract it cannot check.
 - **The model is chosen, not assumed.** Each candidate (a word-counting classifier, a small and a large Bedrock model)
-  runs on the holdout weeks; the platform keeps the one with the lowest cost per case once people's time and money
-  paid out wrongly are counted, among those that clear the gate.
+  runs on the holdout weeks. Of those that clear the gate, the platform starts from the cheapest model and moves to a
+  dearer one only if it saves money per case all in (model calls, people's time, money paid out wrongly) by a margin a
+  paired bootstrap over the same cases calls real at 90%.
 - **Validation that predicts production.** A random split leaks a customer's follow-up emails into the test set;
   the platform splits by time and by customer.
 - **Monitoring before labels arrive.** A daily test on the share of emails the classifier is unsure of catches a new
@@ -106,14 +107,22 @@ Design notes: [routing](docs/architecture/routing.md), [invoices](docs/architect
 
 ## Held-out world
 
-Not run yet. `python scripts/evaluate.py --heldout` runs it once and writes `config/heldout.lock`.
+Run once, with the code and settings the dev world ended on (`config/heldout.lock`): other customers, an earlier
+premium letter (week 14), more English and more paraphrased chat questions.
+
+|  | Routing accuracy | After the letter | Overpaid per 1,000 invoices | Wrong chat answers per 1,000 | All in per month |
+|---|--:|--:|--:|--:|--:|
+| Large model everywhere | 94.3% | 92.8% | €1,922 | 69.86 | €10,408 |
+| Platform | 99.0% | 98.5% | €170 | 2.0 | €3,210 |
+
+What it showed and what changed afterwards: [docs/heldout.md](docs/heldout.md).
 
 ## How it is built
 
 | Part | Files | What it does |
 |---|---|---|
 | Contracts | `config/usecases/*.toml`, `src/pkvai/platform/contract.py` | One file per use case; validated before anything runs. |
-| Model choice | `src/pkvai/platform/select.py` | Candidates on the holdout weeks; the gate, then the lowest cost all in. |
+| Model choice | `src/pkvai/platform/select.py` | Candidates on the holdout weeks; the gate, then the cheapest model unless another saves money all in at 90%. |
 | Monitoring | `src/pkvai/platform/monitor.py` | Binomial test on the unsure share, PSI on the predicted mix, reviewed quality. |
 | Feasibility | `src/pkvai/platform/feasibility.py`, `scripts/design.py` | Lambda or Fargate, quota at peak, data rules; writes the design notes and Terraform inputs. |
 | Routing | `src/pkvai/usecases/routing.py` | Hashed n-grams, tf-idf, logistic regression; LLM for the unsure tail. |

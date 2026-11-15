@@ -65,7 +65,9 @@
      "people_and_leakage_per_case_eur": 0.02567,
      "p95_latency_s": 1.4,
      "passes": true,
-     "why": "clears the gate"
+     "why": "clears the gate",
+     "saving_vs_cheapest": null,
+     "saving_low": null
     },
     {
      "model": "small",
@@ -74,7 +76,9 @@
      "people_and_leakage_per_case_eur": 0.273,
      "p95_latency_s": 1.4,
      "passes": true,
-     "why": "clears the gate"
+     "why": "clears the gate",
+     "saving_vs_cheapest": -0.24799,
+     "saving_low": -0.27833
     },
     {
      "model": "large",
@@ -83,7 +87,9 @@
      "people_and_leakage_per_case_eur": 0.17733,
      "p95_latency_s": 4.5,
      "passes": false,
-     "why": "cost 0.0024 over 0.002; p95 latency 4.5s over 3.0s"
+     "why": "cost 0.0024 over 0.002; p95 latency 4.5s over 3.0s",
+     "saving_vs_cheapest": null,
+     "saving_low": null
     }
    ],
    "chosen": "classical"
@@ -97,7 +103,9 @@
      "people_and_leakage_per_case_eur": 0.056,
      "p95_latency_s": 22.8,
      "passes": true,
-     "why": "clears the gate"
+     "why": "clears the gate",
+     "saving_vs_cheapest": null,
+     "saving_low": null
     },
     {
      "model": "large",
@@ -106,7 +114,9 @@
      "people_and_leakage_per_case_eur": 0.13895,
      "p95_latency_s": 29.0,
      "passes": true,
-     "why": "clears the gate"
+     "why": "clears the gate",
+     "saving_vs_cheapest": -0.0959,
+     "saving_low": -0.1798
     }
    ],
    "chosen": "small"
@@ -120,7 +130,9 @@
      "people_and_leakage_per_case_eur": 0.938,
      "p95_latency_s": 2.8,
      "passes": true,
-     "why": "clears the gate"
+     "why": "clears the gate",
+     "saving_vs_cheapest": null,
+     "saving_low": null
     },
     {
      "model": "large",
@@ -129,7 +141,9 @@
      "people_and_leakage_per_case_eur": 0.833,
      "p95_latency_s": 9.0,
      "passes": false,
-     "why": "p95 latency 9.0s over 6.0s"
+     "why": "p95 latency 9.0s over 6.0s",
+     "saving_vs_cheapest": null,
+     "saving_low": null
     }
    ],
    "chosen": "small"

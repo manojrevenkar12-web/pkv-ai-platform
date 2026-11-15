@@ -95,15 +95,21 @@ class Run:
         pp = self.p["people"]
         misroute = pp["minutes_per_misroute"] / 60 * pp["office_eur_per_hour"]
         if model != "classical":
-            q = np.mean([self.w.route(e, model) == e.team for e in hold])
-            return q, per_case(model, c.tokens, self.models), self.models[model]["p95_latency_s"], (1 - q) * misroute
+            right = np.array([self.w.route(e, model) == e.team for e in hold])
+            cost = per_case(model, c.tokens, self.models)
+            self.cases["routing"][model] = cost + (~right) * misroute
+            return right.mean(), cost, self.models[model]["p95_latency_s"], (1 - right.mean()) * misroute
         m = self.router(self.weeks(self.w.emails, 1, self.train_weeks))
         teams, conf = m.predict([e.text for e in hold])
         floor, fb = self.p["routing"]["confidence_floor"], c.fallback
         out = [self.w.route(e, fb) if cf < floor else t for e, t, cf in zip(hold, teams, conf, strict=True)]
         share = float(np.mean(conf < floor))
-        q = np.mean([t == e.team for t, e in zip(out, hold, strict=True)])
+        right = np.array([t == e.team for t, e in zip(out, hold, strict=True)])
+        q = right.mean()
         cost = per_case("classical", c.tokens, self.models) + share * per_case(fb, c.tokens, self.models)
+        self.cases["routing"][model] = (
+            per_case("classical", c.tokens, self.models) + (conf < floor) * per_case(fb, c.tokens, self.models) + (~right) * misroute
+        )
         lat = self.models[fb]["p95_latency_s"] if share > 0.05 else self.models["classical"]["p95_latency_s"]
         return q, cost, lat, (1 - q) * misroute
 
@@ -248,13 +254,19 @@ class Run:
         first = min(x.week for x in items)
         seen = {(x.customer, x.doctor, x.date, tuple(sorted(y.code for y in x.lines))) for x in self.w.invoices if x.week < first}
         example = None
+        cases = []
+        first_read = per_case("large" if design == "llm_decides" else reader, self.uc["invoices"].tokens, self.models)
+        second_read = per_case("small" if reader == "large" else "large", self.uc["invoices"].spec["tokens_second_read"], self.models)
+        person = pp["minutes_per_invoice_review"] / 60 * pp["office_eur_per_hour"]
         for inv in items:
             truth = self.w.payable(inv)
             paid, notes, second = self.invoice_pipeline(inv, reader, design, seen)
             seconds += second
+            case = first_read + second * second_read
             if paid is None:
                 people += 1
                 paid = truth
+                case += person
             else:
                 auto += 1
                 if abs(paid - truth) > 0.01:
@@ -270,6 +282,7 @@ class Run:
                     example = {"id": inv.id, "invoice": self.w.render(inv), "billed": inv.billed, "paid": paid, "notes": notes}
             over += max(0.0, paid - truth)
             under += max(0.0, truth - paid)
+            cases.append(case + max(0.0, paid - truth))
         n = len(items)
         model_cost = per_case("large" if design == "llm_decides" else reader, self.uc["invoices"].tokens, self.models) + seconds / n * per_case(
             "small" if reader == "large" else "large", self.uc["invoices"].spec["tokens_second_read"], self.models
@@ -288,6 +301,7 @@ class Run:
             "overpaid_eur_per_month": round(over / self.weeks_live * PER_MONTH, 2),
             "quality": r4(1 - wrong / n),
             "example": example,
+            "_cases": np.array(cases),
         }
 
     # ================================================================= assist
@@ -296,7 +310,9 @@ class Run:
         idx = self.index
         stats = defaultdict(int)
         example = None
+        minutes = []
         for ch in items:
+            before = stats["minutes"]
             if design == "memory_large":
                 d, offered = w.draft(ch, "large", None), True
             else:
@@ -323,6 +339,7 @@ class Run:
             if not offered:
                 stats["written"] += 1
                 stats["minutes"] += pp["minutes_per_chat_written"]
+                minutes.append(stats["minutes"] - before)
                 continue
             stats["offered"] += 1
             stats["minutes"] += pp["minutes_per_chat_draft_checked"]
@@ -333,6 +350,7 @@ class Run:
                 stats["minutes"] += pp["minutes_per_chat_written"]
             else:
                 stats["wrong_sent"] += 1
+            minutes.append(stats["minutes"] - before)
         n = len(items)
         m = "large" if design != "platform" else model
         cost = (
@@ -355,6 +373,7 @@ class Run:
             "people_hours_per_month": round(stats["minutes"] / 60 / self.weeks_live * PER_MONTH, 1) if n else 0,
             "quality": r4(1 - stats["wrong_sent"] / n),
             "example": example,
+            "_cases": cost + np.array(minutes) / 60 * pp["office_eur_per_hour"],
         }
 
     def calibrate_floor(self, model: str) -> float:
@@ -387,6 +406,7 @@ class Run:
         live = lambda items: self.weeks(items, self.live_from, w.cfg["weeks"])
 
         selection = {}
+        self.cases = {"routing": {}, "invoices": {}, "assist": {}}
         trials = []
         for m in self.uc["routing"].candidates:
             q, cost, lat, people = self.routing_trial(m)
@@ -396,6 +416,7 @@ class Run:
         rate = self.p["people"]["office_eur_per_hour"]
         for m in self.uc["invoices"].candidates:
             r = self.invoices_run(hold(w.invoices), m, "platform")
+            self.cases["invoices"][m] = r["_cases"]
             people = r["people_minutes_per_invoice"] / 60 * rate + r["overpaid_per_1000_eur"] / 1000
             inv_trials.append(
                 judge(m, r["quality"], r["cost_per_invoice_eur"], self.models[m]["p95_latency_s"] * 2 + 20, self.uc["invoices"].gate, people)
@@ -405,10 +426,11 @@ class Run:
         for m in self.uc["assist"].candidates:
             floors[m] = self.calibrate_floor(m)
             r = self.assist_run(hold(w.chats), m, "platform", floors[m])
+            self.cases["assist"][m] = r["_cases"]
             people = r["minutes_per_chat"] / 60 * rate
             as_trials.append(judge(m, r["quality"], r["cost_per_chat_eur"], self.models[m]["p95_latency_s"] * 2, self.uc["assist"].gate, people))
         selection["assist"] = as_trials
-        chosen = {k: choose(v) for k, v in selection.items()}
+        chosen = {k: choose(v, self.cases[k]) for k, v in selection.items()}
         if any(v is None for v in chosen.values()):
             raise SystemExit(f"no candidate clears a use case's gate: {selection}")
 
@@ -447,6 +469,8 @@ class Run:
                 "all_in_eur_per_month": round(model + people + i["overpaid_eur_per_month"], 2),
             }
 
+        for d in list(invoices.values()) + list(assist.values()):
+            d.pop("_cases", None)
         totals = {
             "large_everywhere": total(routing["large_everywhere"], invoices["llm_decides"], assist["rag_large"]),
             "platform": total(routing["platform"], invoices["platform"], assist["platform"]),

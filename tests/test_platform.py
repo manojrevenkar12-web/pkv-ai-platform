@@ -36,6 +36,18 @@ def test_the_choice_counts_people_and_respects_the_gate():
     assert choose([too_slow]) is None
 
 
+def test_a_dearer_model_must_save_money_beyond_the_noise():
+    gate = {"min_quality": 0.9, "max_cost_per_case_eur": 0.05, "max_p95_latency_s": 5}
+    rng = np.random.default_rng(1)
+    noise = rng.normal(0, 1, 2000)
+    small, large = judge("small", 0.95, 0.01, 1, gate), judge("large", 0.96, 0.03, 2, gate)
+    tie = {"small": 1 + noise, "large": 1 + noise + rng.normal(0, 1, 2000) * 0.5 - 0.01}
+    assert choose([small, large], tie).model == "small"
+    clear = {"small": 1 + noise, "large": 0.5 + noise}
+    assert choose([small, large], clear).model == "large"
+    assert large.saving_low > 0
+
+
 def test_feasibility_picks_fargate_when_lambda_cannot_or_should_not():
     c = settings.usecases()["invoices"]
     assert feasibility.runtime(c, RT)["runtime"] == "lambda"
