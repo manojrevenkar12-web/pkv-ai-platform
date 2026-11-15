@@ -1,0 +1,14 @@
+# The bar every release of the platform has to clear on the dev world. Not moved after the held-out run.
+[routing]
+min_accuracy = 0.93
+max_estimate_gap = 0.015       # validation estimate minus production accuracy, before the letter
+max_drift_detect_days = 4
+[invoices]
+max_overpaid_per_1000_eur = 400
+max_underpaid_per_1000_eur = 150
+min_settled_without_person = 0.7
+[assist]
+max_wrong_answers_per_1000 = 6
+min_drafts_used = 0.6
+[platform]
+max_cost_share_of_large_everywhere = 0.5

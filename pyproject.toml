@@ -1,0 +1,32 @@
+[project]
+name = "pkv-ai-platform"
+version = "0.1.0"
+description = "A small AI platform for a digital private health insurer: use-case contracts, model selection, validation that predicts production, drift monitoring, Terraform for AWS"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "scipy>=1.11"]
+
+[project.optional-dependencies]
+aws = ["boto3>=1.34"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "scripts"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 150
+extend-exclude = ["web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "E741", "E731"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["E402"]

@@ -1,0 +1,26 @@
+name = "invoice-check"
+owner = "Claims"
+purpose = "Read a doctor's invoice, check it against the fee schedule and the tariff, and settle it or send it to a person"
+input = "invoice"
+output = "settlement"
+candidates = ["small", "large"]
+[gate]
+min_quality = 0.97
+max_cost_per_case_eur = 0.03
+max_p95_latency_s = 60.0
+[deploy]
+volume_per_day = 140
+peak_per_minute = 4
+max_input_mb = 12
+processing_s = 25
+memory_mb = 3072
+[data]
+personal = true
+health = true
+retention_days = 3650
+[tokens]
+in = 4200
+out = 650
+[tokens_second_read]            # only the disputed lines are cropped and read again
+in = 900
+out = 60

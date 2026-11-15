@@ -1,0 +1,24 @@
+name = "email-routing"
+owner = "Customer Service"
+purpose = "Send every customer email to the team that will answer it"
+input = "email"
+output = "team"
+candidates = ["classical", "small", "large"]
+fallback = "small"              # cases under the confidence floor
+[gate]
+min_quality = 0.93
+max_cost_per_case_eur = 0.002
+max_p95_latency_s = 3.0
+[deploy]
+volume_per_day = 180
+peak_per_minute = 6
+max_input_mb = 0.5
+processing_s = 1.5
+memory_mb = 1024
+[data]
+personal = true
+health = false
+retention_days = 90
+[tokens]
+in = 700
+out = 30

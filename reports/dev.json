@@ -1,0 +1,1232 @@
+{
+ "world": "dev",
+ "volume": {
+  "weeks": 26,
+  "live_from_week": 13,
+  "emails": 23400,
+  "invoices": 18200,
+  "chats": 13000,
+  "letter_week": 18,
+  "invoices_billed_eur": 1749036.02,
+  "invoices_payable_eur": 1650580.06
+ },
+ "contracts": {
+  "assist": {
+   "name": "chat-assist",
+   "owner": "Concierge",
+   "purpose": "Draft an answer to a customer's chat question from the tariff conditions, for the agent to check and send",
+   "candidates": [
+    "small",
+    "large"
+   ],
+   "gate": {
+    "min_quality": 0.95,
+    "max_cost_per_case_eur": 0.02,
+    "max_p95_latency_s": 6.0
+   }
+  },
+  "invoices": {
+   "name": "invoice-check",
+   "owner": "Claims",
+   "purpose": "Read a doctor's invoice, check it against the fee schedule and the tariff, and settle it or send it to a person",
+   "candidates": [
+    "small",
+    "large"
+   ],
+   "gate": {
+    "min_quality": 0.97,
+    "max_cost_per_case_eur": 0.03,
+    "max_p95_latency_s": 60.0
+   }
+  },
+  "routing": {
+   "name": "email-routing",
+   "owner": "Customer Service",
+   "purpose": "Send every customer email to the team that will answer it",
+   "candidates": [
+    "classical",
+    "small",
+    "large"
+   ],
+   "gate": {
+    "min_quality": 0.93,
+    "max_cost_per_case_eur": 0.002,
+    "max_p95_latency_s": 3.0
+   }
+  }
+ },
+ "selection": {
+  "routing": {
+   "trials": [
+    {
+     "model": "classical",
+     "quality": 0.9939,
+     "cost_per_case_eur": 0.00011,
+     "people_and_leakage_per_case_eur": 0.02567,
+     "p95_latency_s": 1.4,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "small",
+     "quality": 0.935,
+     "cost_per_case_eur": 0.00077,
+     "people_and_leakage_per_case_eur": 0.273,
+     "p95_latency_s": 1.4,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "large",
+     "quality": 0.9578,
+     "cost_per_case_eur": 0.00237,
+     "people_and_leakage_per_case_eur": 0.17733,
+     "p95_latency_s": 4.5,
+     "passes": false,
+     "why": "cost 0.0024 over 0.002; p95 latency 4.5s over 3.0s"
+    }
+   ],
+   "chosen": "classical"
+  },
+  "invoices": {
+   "trials": [
+    {
+     "model": "small",
+     "quality": 0.9986,
+     "cost_per_case_eur": 0.00822,
+     "people_and_leakage_per_case_eur": 0.056,
+     "p95_latency_s": 22.8,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "large",
+     "quality": 0.9964,
+     "cost_per_case_eur": 0.02117,
+     "people_and_leakage_per_case_eur": 0.13895,
+     "p95_latency_s": 29.0,
+     "passes": true,
+     "why": "clears the gate"
+    }
+   ],
+   "chosen": "small"
+  },
+  "assist": {
+   "trials": [
+    {
+     "model": "small",
+     "quality": 0.999,
+     "cost_per_case_eur": 0.00362,
+     "people_and_leakage_per_case_eur": 0.938,
+     "p95_latency_s": 2.8,
+     "passes": true,
+     "why": "clears the gate"
+    },
+    {
+     "model": "large",
+     "quality": 0.998,
+     "cost_per_case_eur": 0.01145,
+     "people_and_leakage_per_case_eur": 0.833,
+     "p95_latency_s": 9.0,
+     "passes": false,
+     "why": "p95 latency 9.0s over 6.0s"
+    }
+   ],
+   "chosen": "small"
+  }
+ },
+ "routing": {
+  "validation": {
+   "random_split": 0.9867,
+   "grouped_by_time_and_customer": 0.9737,
+   "production_before_letter": 0.9656,
+   "random_test_emails": 2111,
+   "grouped_test_emails": 1481
+  },
+  "designs": {
+   "large_everywhere": {
+    "accuracy": 0.9494,
+    "accuracy_on_letter_answers": 0.9336,
+    "misroutes": 638,
+    "misroutes_per_week": 45.6,
+    "llm_share": 1.0,
+    "large_share": 1.0,
+    "cost_per_email_eur": 0.002374,
+    "model_eur_per_month": 9.26,
+    "people_hours_per_month": 19.7,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9544,
+     0.95,
+     0.96,
+     0.9589,
+     0.9511,
+     0.9489,
+     0.9367,
+     0.9411,
+     0.9356,
+     0.9589,
+     0.9511,
+     0.9444,
+     0.9433,
+     0.9567
+    ],
+    "alarms": [],
+    "retrains": 0,
+    "daily": []
+   },
+   "small_everywhere": {
+    "accuracy": 0.9195,
+    "accuracy_on_letter_answers": 0.8779,
+    "misroutes": 1014,
+    "misroutes_per_week": 72.4,
+    "llm_share": 1.0,
+    "large_share": 0.0,
+    "cost_per_email_eur": 0.000768,
+    "model_eur_per_month": 3.0,
+    "people_hours_per_month": 31.4,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9422,
+     0.9289,
+     0.9356,
+     0.9444,
+     0.92,
+     0.9222,
+     0.9233,
+     0.8978,
+     0.91,
+     0.9067,
+     0.9044,
+     0.9067,
+     0.9267,
+     0.9044
+    ],
+    "alarms": [],
+    "retrains": 0,
+    "daily": []
+   },
+   "classical_static": {
+    "accuracy": 0.9656,
+    "accuracy_on_letter_answers": 0.8779,
+    "misroutes": 434,
+    "misroutes_per_week": 31.0,
+    "llm_share": 0.325,
+    "large_share": 0.0,
+    "cost_per_email_eur": 0.00027,
+    "model_eur_per_month": 1.05,
+    "people_hours_per_month": 13.4,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9911,
+     0.9978,
+     0.9867,
+     0.99,
+     0.9867,
+     0.9611,
+     0.9622,
+     0.9467,
+     0.9456,
+     0.9444,
+     0.9511,
+     0.9433,
+     0.9656,
+     0.9456
+    ],
+    "alarms": [],
+    "retrains": 0,
+    "daily": []
+   },
+   "platform_no_monitor": {
+    "accuracy": 0.9848,
+    "accuracy_on_letter_answers": 0.9531,
+    "misroutes": 191,
+    "misroutes_per_week": 13.6,
+    "llm_share": 0.1571,
+    "large_share": 0.0,
+    "cost_per_email_eur": 0.000141,
+    "model_eur_per_month": 0.55,
+    "people_hours_per_month": 5.9,
+    "labels_from_people": 0,
+    "weekly": [
+     0.9911,
+     0.9967,
+     0.9889,
+     0.9944,
+     0.9933,
+     0.9633,
+     0.9644,
+     0.9533,
+     0.9722,
+     0.9889,
+     0.9933,
+     0.9933,
+     0.9989,
+     0.9956
+    ],
+    "alarms": [],
+    "retrains": 13,
+    "daily": []
+   },
+   "platform": {
+    "accuracy": 0.992,
+    "accuracy_on_letter_answers": 0.9819,
+    "misroutes": 101,
+    "misroutes_per_week": 7.2,
+    "llm_share": 0.0946,
+    "large_share": 0.0024,
+    "cost_per_email_eur": 9.6e-05,
+    "model_eur_per_month": 0.38,
+    "people_hours_per_month": 4.4,
+    "labels_from_people": 253,
+    "weekly": [
+     0.9911,
+     0.9967,
+     0.9889,
+     0.9944,
+     0.9933,
+     0.97,
+     0.9822,
+     0.9911,
+     0.9922,
+     0.9956,
+     0.9978,
+     0.9978,
+     0.9989,
+     0.9978
+    ],
+    "alarms": [
+     {
+      "week": 18,
+      "day": 0,
+      "why": [
+       "29% of emails under the confidence floor, against 12% usually"
+      ]
+     }
+    ],
+    "retrains": 27,
+    "daily": [
+     {
+      "week": 13,
+      "day": 0,
+      "low_confidence": 0.155,
+      "psi": 0.0233,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 1,
+      "low_confidence": 0.0896,
+      "psi": 0.0548,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 2,
+      "low_confidence": 0.124,
+      "psi": 0.0508,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 3,
+      "low_confidence": 0.1154,
+      "psi": 0.0674,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 4,
+      "low_confidence": 0.1034,
+      "psi": 0.0158,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 5,
+      "low_confidence": 0.0787,
+      "psi": 0.047,
+      "alarm": false
+     },
+     {
+      "week": 13,
+      "day": 6,
+      "low_confidence": 0.1286,
+      "psi": 0.0376,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 0,
+      "low_confidence": 0.2,
+      "psi": 0.0448,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 1,
+      "low_confidence": 0.0962,
+      "psi": 0.064,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 2,
+      "low_confidence": 0.1484,
+      "psi": 0.0864,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 3,
+      "low_confidence": 0.156,
+      "psi": 0.0646,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 4,
+      "low_confidence": 0.146,
+      "psi": 0.0048,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 5,
+      "low_confidence": 0.1395,
+      "psi": 0.0836,
+      "alarm": false
+     },
+     {
+      "week": 14,
+      "day": 6,
+      "low_confidence": 0.1349,
+      "psi": 0.0268,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 0,
+      "low_confidence": 0.1157,
+      "psi": 0.0089,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 1,
+      "low_confidence": 0.1102,
+      "psi": 0.0348,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 2,
+      "low_confidence": 0.1579,
+      "psi": 0.1017,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 3,
+      "low_confidence": 0.1032,
+      "psi": 0.062,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 4,
+      "low_confidence": 0.1119,
+      "psi": 0.037,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 5,
+      "low_confidence": 0.1194,
+      "psi": 0.1551,
+      "alarm": false
+     },
+     {
+      "week": 15,
+      "day": 6,
+      "low_confidence": 0.0903,
+      "psi": 0.0933,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 0,
+      "low_confidence": 0.1615,
+      "psi": 0.0348,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 1,
+      "low_confidence": 0.1552,
+      "psi": 0.1288,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 2,
+      "low_confidence": 0.1333,
+      "psi": 0.0124,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 3,
+      "low_confidence": 0.0844,
+      "psi": 0.1066,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 4,
+      "low_confidence": 0.1642,
+      "psi": 0.0774,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 5,
+      "low_confidence": 0.1473,
+      "psi": 0.0665,
+      "alarm": false
+     },
+     {
+      "week": 16,
+      "day": 6,
+      "low_confidence": 0.1026,
+      "psi": 0.145,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 0,
+      "low_confidence": 0.0687,
+      "psi": 0.1384,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 1,
+      "low_confidence": 0.115,
+      "psi": 0.0341,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 2,
+      "low_confidence": 0.0833,
+      "psi": 0.0371,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 3,
+      "low_confidence": 0.1026,
+      "psi": 0.0759,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 4,
+      "low_confidence": 0.1053,
+      "psi": 0.0394,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 5,
+      "low_confidence": 0.073,
+      "psi": 0.0399,
+      "alarm": false
+     },
+     {
+      "week": 17,
+      "day": 6,
+      "low_confidence": 0.0657,
+      "psi": 0.0093,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 0,
+      "low_confidence": 0.2941,
+      "psi": 0.0694,
+      "alarm": false
+     },
+     {
+      "week": 18,
+      "day": 1,
+      "low_confidence": 0.3798,
+      "psi": 0.0492,
+      "alarm": true
+     },
+     {
+      "week": 18,
+      "day": 2,
+      "low_confidence": 0.2734,
+      "psi": 0.122,
+      "alarm": true
+     },
+     {
+      "week": 18,
+      "day": 3,
+      "low_confidence": 0.3655,
+      "psi": 0.0896,
+      "alarm": true
+     },
+     {
+      "week": 18,
+      "day": 4,
+      "low_confidence": 0.2302,
+      "psi": 0.1584,
+      "alarm": true
+     },
+     {
+      "week": 18,
+      "day": 5,
+      "low_confidence": 0.2727,
+      "psi": 0.0809,
+      "alarm": true
+     },
+     {
+      "week": 18,
+      "day": 6,
+      "low_confidence": 0.2302,
+      "psi": 0.2064,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 0,
+      "low_confidence": 0.1957,
+      "psi": 0.1594,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 1,
+      "low_confidence": 0.1795,
+      "psi": 0.2331,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 2,
+      "low_confidence": 0.1203,
+      "psi": 0.2363,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 3,
+      "low_confidence": 0.128,
+      "psi": 0.1416,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 4,
+      "low_confidence": 0.1121,
+      "psi": 0.1959,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 5,
+      "low_confidence": 0.1515,
+      "psi": 0.1879,
+      "alarm": true
+     },
+     {
+      "week": 19,
+      "day": 6,
+      "low_confidence": 0.0576,
+      "psi": 0.2794,
+      "alarm": true
+     },
+     {
+      "week": 20,
+      "day": 0,
+      "low_confidence": 0.0763,
+      "psi": 0.1835,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 1,
+      "low_confidence": 0.0866,
+      "psi": 0.0707,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 2,
+      "low_confidence": 0.0846,
+      "psi": 0.0747,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 3,
+      "low_confidence": 0.0719,
+      "psi": 0.1338,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 4,
+      "low_confidence": 0.0763,
+      "psi": 0.0371,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 5,
+      "low_confidence": 0.104,
+      "psi": 0.0839,
+      "alarm": false
+     },
+     {
+      "week": 20,
+      "day": 6,
+      "low_confidence": 0.0846,
+      "psi": 0.0502,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 0,
+      "low_confidence": 0.035,
+      "psi": 0.0864,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 1,
+      "low_confidence": 0.0576,
+      "psi": 0.0204,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 2,
+      "low_confidence": 0.075,
+      "psi": 0.0149,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 3,
+      "low_confidence": 0.0667,
+      "psi": 0.0903,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 4,
+      "low_confidence": 0.0504,
+      "psi": 0.0429,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 5,
+      "low_confidence": 0.0365,
+      "psi": 0.0484,
+      "alarm": false
+     },
+     {
+      "week": 21,
+      "day": 6,
+      "low_confidence": 0.041,
+      "psi": 0.1321,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 0,
+      "low_confidence": 0.0222,
+      "psi": 0.05,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 1,
+      "low_confidence": 0.0226,
+      "psi": 0.0515,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 2,
+      "low_confidence": 0.0079,
+      "psi": 0.0908,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 3,
+      "low_confidence": 0.0603,
+      "psi": 0.1026,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 4,
+      "low_confidence": 0.0185,
+      "psi": 0.1103,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 5,
+      "low_confidence": 0.014,
+      "psi": 0.1543,
+      "alarm": false
+     },
+     {
+      "week": 22,
+      "day": 6,
+      "low_confidence": 0.0072,
+      "psi": 0.0185,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 0,
+      "low_confidence": 0.0348,
+      "psi": 0.0903,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 1,
+      "low_confidence": 0.015,
+      "psi": 0.0469,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 2,
+      "low_confidence": 0.0342,
+      "psi": 0.0714,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 3,
+      "low_confidence": 0.0,
+      "psi": 0.0302,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 4,
+      "low_confidence": 0.0142,
+      "psi": 0.0781,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 5,
+      "low_confidence": 0.0602,
+      "psi": 0.1381,
+      "alarm": false
+     },
+     {
+      "week": 23,
+      "day": 6,
+      "low_confidence": 0.0342,
+      "psi": 0.0928,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 0,
+      "low_confidence": 0.0278,
+      "psi": 0.055,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 1,
+      "low_confidence": 0.024,
+      "psi": 0.0915,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 2,
+      "low_confidence": 0.053,
+      "psi": 0.0378,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 3,
+      "low_confidence": 0.0563,
+      "psi": 0.0681,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 4,
+      "low_confidence": 0.0504,
+      "psi": 0.0433,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 5,
+      "low_confidence": 0.0645,
+      "psi": 0.0116,
+      "alarm": false
+     },
+     {
+      "week": 24,
+      "day": 6,
+      "low_confidence": 0.0614,
+      "psi": 0.0478,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 0,
+      "low_confidence": 0.0769,
+      "psi": 0.0507,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 1,
+      "low_confidence": 0.049,
+      "psi": 0.0926,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 2,
+      "low_confidence": 0.0574,
+      "psi": 0.0579,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 3,
+      "low_confidence": 0.0726,
+      "psi": 0.0635,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 4,
+      "low_confidence": 0.0504,
+      "psi": 0.0202,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 5,
+      "low_confidence": 0.0556,
+      "psi": 0.0209,
+      "alarm": false
+     },
+     {
+      "week": 25,
+      "day": 6,
+      "low_confidence": 0.0229,
+      "psi": 0.0709,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 0,
+      "low_confidence": 0.0082,
+      "psi": 0.0765,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 1,
+      "low_confidence": 0.0323,
+      "psi": 0.0301,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 2,
+      "low_confidence": 0.0073,
+      "psi": 0.0417,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 3,
+      "low_confidence": 0.0164,
+      "psi": 0.0134,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 4,
+      "low_confidence": 0.015,
+      "psi": 0.0447,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 5,
+      "low_confidence": 0.0234,
+      "psi": 0.0578,
+      "alarm": false
+     },
+     {
+      "week": 26,
+      "day": 6,
+      "low_confidence": 0.0149,
+      "psi": 0.0396,
+      "alarm": false
+     }
+    ]
+   }
+  },
+  "drift": {
+   "letter_week": 18,
+   "alarm": {
+    "week": 18,
+    "day": 0,
+    "why": [
+     "29% of emails under the confidence floor, against 12% usually"
+    ]
+   },
+   "detected_after_days": 0,
+   "false_alarms_before_letter": 0
+  },
+  "example": {
+   "text": "Hallo, Ihre Beitragserhöhung zum 1. Januar: welche Optionen habe ich, damit der Beitrag sinkt. Beitrag reduzieren durch höheren Selbstbehalt. Danke im Voraus",
+   "team": "tarif"
+  }
+ },
+ "invoices": {
+  "llm_decides": {
+   "invoices": 9800,
+   "settled_without_person": 0.9947,
+   "wrong_automatic_settlements": 449,
+   "overpaid_per_1000_eur": 1931.44,
+   "underpaid_per_1000_eur": 64.47,
+   "second_reads": 0.0,
+   "cost_per_invoice_eur": 0.02073,
+   "model_eur_per_month": 62.88,
+   "people_hours_per_month": 1.1,
+   "people_minutes_per_invoice": 0.0212,
+   "overpaid_eur_per_month": 5858.71,
+   "quality": 0.9542,
+   "example": null
+  },
+  "code_rules": {
+   "invoices": 9800,
+   "settled_without_person": 0.9944,
+   "wrong_automatic_settlements": 921,
+   "overpaid_per_1000_eur": 89.46,
+   "underpaid_per_1000_eur": 1116.58,
+   "second_reads": 0.0,
+   "cost_per_invoice_eur": 0.00677,
+   "model_eur_per_month": 20.54,
+   "people_hours_per_month": 1.1,
+   "people_minutes_per_invoice": 0.0224,
+   "overpaid_eur_per_month": 271.37,
+   "quality": 0.906,
+   "example": null
+  },
+  "platform": {
+   "invoices": 9800,
+   "settled_without_person": 0.986,
+   "wrong_automatic_settlements": 61,
+   "overpaid_per_1000_eur": 84.48,
+   "underpaid_per_1000_eur": 43.15,
+   "second_reads": 0.4276,
+   "cost_per_invoice_eur": 0.0082,
+   "model_eur_per_month": 24.88,
+   "people_hours_per_month": 2.8,
+   "people_minutes_per_invoice": 0.0559,
+   "overpaid_eur_per_month": 256.25,
+   "quality": 0.9938,
+   "example": {
+    "id": "R008404",
+    "invoice": "Rechnung Dr. Schmidt, Behandlung am 2026-04-04\nGOÄ 410  Faktor 2,5  29,14 €\nGOÄ 3511  Faktor 1,15  3,35 €\nGOÄ 8  Faktor 2,3  34,86 €\nGOÄ 3  Faktor 2,3  20,11 €\nGOÄ 651  Faktor 1,8  15,95 €\nGOÄ 250  Faktor 1,8  4,20 €\nSumme 107,61 €",
+    "billed": 107.61,
+    "paid": 99.45,
+    "notes": [
+     "GOÄ 410: factor 2.5 above the threshold without a written reason",
+     "GOÄ 410: billed 29.14, allowed 20.98"
+    ]
+   }
+  }
+ },
+ "assist": {
+  "retrieval": {
+   "tariff_words": 1.0,
+   "paraphrased": 0.2917,
+   "paraphrased_after_rewrite": 0.8287
+  },
+  "floor": 0.125,
+  "designs": {
+   "memory_large": {
+    "chats": 7000,
+    "drafts_used": 0.3541,
+    "wrong_answers_per_1000": 256.43,
+    "wrong_drafts_caught_by_agent": 2726,
+    "blocked_by_check": 0,
+    "below_floor": 0,
+    "minutes_per_chat": 2.56,
+    "cost_per_chat_eur": 0.01032,
+    "model_eur_per_month": 22.35,
+    "people_hours_per_month": 92.4,
+    "quality": 0.7436,
+    "example": null
+   },
+   "rag_large": {
+    "chats": 7000,
+    "drafts_used": 0.6469,
+    "wrong_answers_per_1000": 54.86,
+    "wrong_drafts_caught_by_agent": 621,
+    "blocked_by_check": 0,
+    "below_floor": 0,
+    "minutes_per_chat": 1.98,
+    "cost_per_chat_eur": 0.01032,
+    "model_eur_per_month": 22.35,
+    "people_hours_per_month": 71.6,
+    "quality": 0.9451,
+    "example": null
+   },
+   "platform": {
+    "chats": 7000,
+    "drafts_used": 0.8787,
+    "wrong_answers_per_1000": 5.29,
+    "wrong_drafts_caught_by_agent": 54,
+    "blocked_by_check": 322,
+    "below_floor": 277,
+    "minutes_per_chat": 1.36,
+    "cost_per_chat_eur": 0.00363,
+    "model_eur_per_month": 7.87,
+    "people_hours_per_month": 49.0,
+    "quality": 0.9947,
+    "example": {
+     "question": "Kann ich in einen anderen Tarif wechseln?",
+     "draft_fact": "Zweibettzimmer",
+     "cites": [
+      "C1"
+     ],
+     "clause_text": "Tarifwechsel. Ein Wechsel in einen gleichartigen Tarif ist jederzeit möglich, Mehrleistungen nur mit Gesundheitsprüfung."
+    }
+   }
+  }
+ },
+ "totals": {
+  "large_everywhere": {
+   "model_eur_per_month": 94.49,
+   "people_hours_per_month": 92.4,
+   "people_eur_per_month": 3880.8,
+   "overpaid_eur_per_month": 5858.71,
+   "all_in_eur_per_month": 9834.0
+  },
+  "platform": {
+   "model_eur_per_month": 33.13,
+   "people_hours_per_month": 56.2,
+   "people_eur_per_month": 2360.4,
+   "overpaid_eur_per_month": 256.25,
+   "all_in_eur_per_month": 2649.78
+  }
+ },
+ "feasibility": {
+  "assist": {
+   "runtime": "lambda",
+   "why": "Lambda is cheaper until about 49,450 cases a day",
+   "lambda_eur_per_month": 0.14,
+   "fargate_eur_per_month": 69.26,
+   "crossover_cases_per_day": 49450,
+   "input_via_s3": false,
+   "concurrency": 1,
+   "quota": {
+    "tokens_per_minute_at_peak": 14100,
+    "quota_share": 0.07,
+    "ask_for_increase": false
+   },
+   "data": [
+    "model calls stay in eu-central-1: no cross-region inference profile outside the EU",
+    "prompts and outputs are not logged in plain text; the audit log keeps ids and hashes",
+    "health data: encrypted with a customer-managed KMS key, access only through the use case's own role",
+    "inputs and outputs deleted after 365 days by an S3 lifecycle rule"
+   ],
+   "model": "small",
+   "bedrock_model_id": "anthropic.claude-haiku-4-5"
+  },
+  "invoices": {
+   "runtime": "lambda",
+   "why": "Lambda is cheaper until about 2,383 cases a day",
+   "lambda_eur_per_month": 4.88,
+   "fargate_eur_per_month": 83.09,
+   "crossover_cases_per_day": 2383,
+   "input_via_s3": true,
+   "concurrency": 4,
+   "quota": {
+    "tokens_per_minute_at_peak": 27695,
+    "quota_share": 0.138,
+    "ask_for_increase": false
+   },
+   "data": [
+    "model calls stay in eu-central-1: no cross-region inference profile outside the EU",
+    "prompts and outputs are not logged in plain text; the audit log keeps ids and hashes",
+    "health data: encrypted with a customer-managed KMS key, access only through the use case's own role",
+    "inputs and outputs deleted after 3650 days by an S3 lifecycle rule"
+   ],
+   "model": "small",
+   "bedrock_model_id": "anthropic.claude-haiku-4-5"
+  },
+  "routing": {
+   "runtime": "lambda",
+   "why": "Lambda is cheaper until about 98,499 cases a day",
+   "lambda_eur_per_month": 0.13,
+   "fargate_eur_per_month": 69.26,
+   "crossover_cases_per_day": 98499,
+   "input_via_s3": false,
+   "concurrency": 1,
+   "quota": {
+    "tokens_per_minute_at_peak": 414,
+    "quota_share": 0.002,
+    "ask_for_increase": false
+   },
+   "data": [
+    "model calls stay in eu-central-1: no cross-region inference profile outside the EU",
+    "prompts and outputs are not logged in plain text; the audit log keeps ids and hashes",
+    "inputs and outputs deleted after 90 days by an S3 lifecycle rule"
+   ],
+   "model": "classical",
+   "bedrock_model_id": "anthropic.claude-haiku-4-5"
+  }
+ },
+ "gate": {
+  "routing": {
+   "min_accuracy": 0.93,
+   "max_estimate_gap": 0.015,
+   "max_drift_detect_days": 4
+  },
+  "invoices": {
+   "max_overpaid_per_1000_eur": 400,
+   "max_underpaid_per_1000_eur": 150,
+   "min_settled_without_person": 0.7
+  },
+  "assist": {
+   "max_wrong_answers_per_1000": 6,
+   "min_drafts_used": 0.6
+  },
+  "platform": {
+   "max_cost_share_of_large_everywhere": 0.5
+  }
+ }
+}

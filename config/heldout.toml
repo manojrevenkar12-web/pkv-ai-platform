@@ -1,0 +1,62 @@
+# The held-out world: other customers, an earlier premium letter, more English, more paraphrase. Run once.
+# What really happens at a digital private health insurer: customers' emails, the doctors' invoices they upload,
+# their chat questions, and how the models misread them. Only scripts/evaluate.py and the tests read this file.
+name = "heldout"
+seed = "heldout-pkv-2026-b"
+weeks = 26
+
+[emails]
+per_week = 1100
+english_share = 0.3
+thread_follow_up = 0.45        # chance a customer writes again in the same thread, mostly the same words
+distractor_phrases = 0.6       # chance an email also mentions another team's topic in passing
+premium_letter_week = 14       # premium-adjustment letters go out: a new kind of email arrives
+premium_letter_share = 0.4    # share of emails from that week on that answer the letter
+premium_intents = { tarif = 0.35, kuendigung = 0.25, beschwerde = 0.2, beitrag = 0.2 }
+
+[invoices]
+per_week = 700
+lines_min = 2
+lines_max = 7
+above_threshold_share = 0.28   # lines billed above the threshold factor
+missing_reason_share = 0.4    # of those, no written reason on the invoice
+above_max_share = 0.03         # lines above the maximum factor
+fee_agreement_share = 0.5      # of those, a fee agreement is attached
+arithmetic_error_share = 0.02  # line amount does not match points x point value x factor
+excluded_pair_share = 0.05     # invoice bills two numbers that may not be billed together
+duplicate_share = 0.015        # the same invoice uploaded again
+high_value_eur = 1500
+
+[chats]
+per_week = 500
+paraphrase = 0.6               # question worded away from the tariff text
+
+[llm]
+# error rates per model; draws are keyed by item and mistake, never by design
+[llm.small]
+route_error = 0.07
+route_error_new_kind = 0.12
+factor_misread = 0.015
+code_misread = 0.008
+reason_missed = 0.05
+amount_misread = 0.01
+rule_slip = 0.12               # when the model itself applies the fee rules
+answer_wrong_when_grounded = 0.03
+hallucinate_when_ungrounded = 0.55
+answer_from_memory_right = 0.25
+rewrites_in_tariff_words = 0.75
+[llm.large]
+route_error = 0.045
+route_error_new_kind = 0.07
+factor_misread = 0.01
+code_misread = 0.005
+reason_missed = 0.03
+amount_misread = 0.006
+rule_slip = 0.07
+answer_wrong_when_grounded = 0.015
+hallucinate_when_ungrounded = 0.4
+answer_from_memory_right = 0.35
+rewrites_in_tariff_words = 0.85
+
+[people]
+agent_catches_wrong_draft = 0.6

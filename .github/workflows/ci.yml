@@ -1,0 +1,41 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: pip install -e ".[dev]"
+      - run: ruff check . && ruff format --check .
+      - run: python -m pytest -q
+      - name: The evaluation reproduces the committed report
+        run: |
+          python scripts/evaluate.py > /dev/null
+          git diff --exit-code reports/dev.json
+      - name: Quality gate
+        run: python scripts/gate.py
+      - name: Design notes, Terraform inputs, README and console data match the reports
+        run: |
+          python scripts/design.py
+          python scripts/readme.py
+          git diff --exit-code docs/architecture infra/live/usecases.auto.tfvars.json README.md web/public/data/console.json
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive infra
+      - working-directory: infra/live
+        run: terraform init -backend=false -input=false && terraform validate
+  web:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci
+      - run: npm run build
+      - run: npm test

@@ -1,0 +1,23 @@
+name = "chat-assist"
+owner = "Concierge"
+purpose = "Draft an answer to a customer's chat question from the tariff conditions, for the agent to check and send"
+input = "chat"
+output = "draft"
+candidates = ["small", "large"]
+[gate]
+min_quality = 0.95
+max_cost_per_case_eur = 0.02
+max_p95_latency_s = 6.0
+[deploy]
+volume_per_day = 100
+peak_per_minute = 5
+max_input_mb = 0.1
+processing_s = 3
+memory_mb = 1024
+[data]
+personal = true
+health = true
+retention_days = 365
+[tokens]
+in = 2600
+out = 220

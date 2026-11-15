@@ -1,0 +1,68 @@
+# How the platform runs every use case. The world never reads this file.
+# Bedrock ids are placeholders for the model family: set each to the exact id (or EU inference profile) enabled in the account.
+[models.small]
+bedrock_id = "anthropic.claude-haiku-4-5"
+in_per_mtok_eur = 0.9
+out_per_mtok_eur = 4.6
+p95_latency_s = 1.4
+[models.large]
+bedrock_id = "anthropic.claude-sonnet-4-5"
+in_per_mtok_eur = 2.8
+out_per_mtok_eur = 13.8
+p95_latency_s = 4.5
+[models.classical]
+bedrock_id = ""
+in_per_mtok_eur = 0.0
+out_per_mtok_eur = 0.0
+p95_latency_s = 0.02
+compute_eur_per_case = 0.00002
+
+[validation]
+train_weeks = 10               # the first weeks a use case has labelled data for
+holdout_weeks = 2              # then the weeks the gate is decided on
+random_test_share = 0.2        # what a random split would hold out instead
+
+[monitor]
+review_per_day = 20            # cases a person labels each day, per use case
+psi_alarm = 0.2                # population stability index of the input mix
+low_confidence_p = 0.0005      # alarm when a day's count under the confidence floor is this unlikely at the holdout's rate
+accuracy_alarm_drop = 0.04     # reviewed accuracy below the gate's estimate by this much
+label_delay_weeks = 1          # closed tickets tell the final team a week later
+
+[routing]
+confidence_floor = 0.7         # below it the email goes to the small model
+new_words_share = 0.15         # while an alarm is open: emails with more unseen words than this go to the large model
+alarm_days_min = 7             # an alarm stays open at least this long, and until the delayed labels cover it
+retrain_every_weeks = 1
+vocab_buckets = 16384
+epochs = 300
+learning_rate = 40.0
+warm_epochs = 60               # a retrain starts from the deployed model's weights
+l2 = 0.00001
+
+[assist]
+top_k = 3
+embed_dim = 512
+
+[people]
+minutes_per_misroute = 6
+minutes_per_invoice_review = 4
+minutes_per_invoice_manual = 7
+minutes_per_chat_written = 4
+minutes_per_chat_draft_checked = 1
+office_eur_per_hour = 42
+
+[runtime]
+region = "eu-central-1"
+lambda_max_s = 900
+lambda_max_memory_mb = 10240
+lambda_max_sync_payload_mb = 6
+lambda_eur_per_gb_s = 0.0000155
+lambda_eur_per_million_requests = 0.19
+fargate_eur_per_vcpu_hour = 0.0433
+fargate_eur_per_gb_hour = 0.0048
+fargate_vcpu = 1
+fargate_min_tasks = 2          # two tasks in two zones, always on
+safety_factor = 3              # processing time x this must stay under the Lambda limit
+bedrock_tokens_per_minute_quota = 200000   # per model and region, before a quota increase
+quota_headroom = 0.5           # flag a use case that needs more than this share of the quota at peak
